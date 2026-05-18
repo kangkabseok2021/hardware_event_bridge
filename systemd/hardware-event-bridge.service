@@ -1,0 +1,26 @@
+[Unit]
+Description=Hardware Event Bridge — sensor telemetry to REST API
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=heb
+WorkingDirectory=/opt/hardware-event-bridge
+ExecStart=/opt/hardware-event-bridge/hardware_event_bridge
+Restart=on-failure
+RestartSec=5s
+WatchdogSec=30s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hardware-event-bridge
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/hardware-event-bridge/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
