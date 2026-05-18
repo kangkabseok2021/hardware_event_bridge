@@ -1,6 +1,8 @@
 #include "DeviceManager.h"
 #include <chrono>
+#include <mutex>
 #include <optional>
+#include <shared_mutex>
 
 long long DeviceManager::nowMs() const {
     return std::chrono::duration_cast<std::chrono::milliseconds>(

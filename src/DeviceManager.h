@@ -1,6 +1,8 @@
 #pragma once
 #include "DeviceState.h"
 #include "Event.h"
+#include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
