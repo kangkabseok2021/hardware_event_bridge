@@ -56,6 +56,18 @@ void RestApi::start() {
         res.set_content(arr.dump(), "application/json");
     });
 
+    // GET /api/power — PDU telemetry (outlet states, thermal FSM, CPU + memory)
+    // Reads the last payload emitted by the power_monitor device.
+    svr_->http.Get("/api/power", [this](const httplib::Request&, httplib::Response& res) {
+        auto dev = mgr_.getDevice("power-monitor-0");
+        if (!dev || dev->last_payload.empty()) {
+            res.status = 503;
+            res.set_content(R"({"error":"power monitor not ready"})", "application/json");
+            return;
+        }
+        res.set_content(dev->last_payload, "application/json");
+    });
+
     // GET /health
     svr_->http.Get("/health", [](const httplib::Request&, httplib::Response& res) {
         res.set_content(R"({"status":"ok"})", "application/json");

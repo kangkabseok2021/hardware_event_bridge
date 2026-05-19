@@ -2,6 +2,7 @@
 #include "IDevice.h"
 #include "SerialDevice.h"
 #include "I2cDevice.h"
+#include "PowerMonitorDevice.h"
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -16,8 +17,9 @@ public:
         const DeviceId&    id,
         EventEngine&       engine)
     {
-        if (type == "serial") return std::make_unique<SerialDevice>(id, engine);
-        if (type == "i2c")    return std::make_unique<I2cDevice>(id, engine);
+        if (type == "serial")        return std::make_unique<SerialDevice>(id, engine);
+        if (type == "i2c")           return std::make_unique<I2cDevice>(id, engine);
+        if (type == "power_monitor") return std::make_unique<PowerMonitorDevice>(id, engine);
         throw std::invalid_argument("Unknown device type: " + type);
     }
 };

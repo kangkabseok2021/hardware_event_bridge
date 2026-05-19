@@ -28,9 +28,10 @@ int main() {
     // Factory creates devices from config (in production: read from YAML/env)
     struct DeviceConfig { std::string id, type; };
     std::vector<DeviceConfig> cfg = {
-        {"serial-0", "serial"},
-        {"i2c-0",    "i2c"},
-        {"i2c-1",    "i2c"},
+        {"serial-0",       "serial"},
+        {"i2c-0",          "i2c"},
+        {"i2c-1",          "i2c"},
+        {"power-monitor-0","power_monitor"},
     };
 
     std::vector<std::unique_ptr<IDevice>> devices;
@@ -43,7 +44,7 @@ int main() {
 
     api.start();
     std::cout << "[bridge] Running — REST API on :8080\n"
-              << "[bridge] Endpoints: GET /devices  /devices/{id}  /events  /health\n";
+              << "[bridge] Endpoints: GET /devices  /devices/{id}  /events  /api/power  /health\n";
 
     while (g_running) std::this_thread::sleep_for(std::chrono::milliseconds(100));
 

@@ -1,0 +1,25 @@
+[Unit]
+Description=PDU Aggregator — polls bridge /api/power and logs to SQLite
+After=hardware-event-bridge.service
+Requires=hardware-event-bridge.service
+
+[Service]
+Type=simple
+User=heb
+WorkingDirectory=/opt/hardware-event-bridge
+ExecStart=/opt/hardware-event-bridge/.venv/bin/python pdu/aggregator.py
+Restart=on-failure
+RestartSec=10s
+Environment=BRIDGE_URL=http://localhost:8080
+Environment=PDU_DB=/opt/hardware-event-bridge/data/pdu_metrics.db
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hardware-pdu
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/hardware-event-bridge/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

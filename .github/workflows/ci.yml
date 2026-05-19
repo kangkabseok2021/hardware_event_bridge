@@ -7,66 +7,31 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  cpp-build-test:
+    name: C++ build + GoogleTest
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libsqlite3-dev
+      - name: Install SQLite3
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libsqlite3-dev
 
-      - name: Configure CMake
+      - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_DEFAULT_CMP0135=NEW
 
       - name: Build
         run: cmake --build build -j$(nproc)
 
-      - name: Run GoogleTest suite
+      - name: Test (34 GoogleTests)
         run: ctest --test-dir build --output-on-failure -V
 
-      - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hardware-event-bridge-linux
-          path: build/hardware_event_bridge
-
-  package:
+  python-tests:
+    name: Python PDU aggregator tests
     runs-on: ubuntu-latest
-    needs: build-and-test
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libsqlite3-dev
-
-      - name: Build release binary
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_DEFAULT_CMP0135=NEW
-          cmake --build build -j$(nproc) --target hardware_event_bridge
-
-      - name: Create Debian package structure
-        run: |
-          PKG=hardware-event-bridge_1.0.0_amd64
-          mkdir -p $PKG/DEBIAN $PKG/opt/hardware-event-bridge $PKG/lib/systemd/system
-          cp build/hardware_event_bridge $PKG/opt/hardware-event-bridge/
-          cp systemd/hardware-event-bridge.service $PKG/lib/systemd/system/
-          cat > $PKG/DEBIAN/control << EOF
-          Package: hardware-event-bridge
-          Version: 1.0.0
-          Architecture: amd64
-          Maintainer: Kab Seok Kang
-          Description: Hardware Event Bridge daemon
-           Bridges hardware peripherals to a REST API via epoll event loop.
-          EOF
-          dpkg-deb --build $PKG
-
-      - name: Upload .deb artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hardware-event-bridge-deb
-          path: "*.deb"
+      - uses: astral-sh/setup-uv@v3
+      - name: Install deps
+        run: uv sync --frozen
+      - name: Run pytest
+        run: uv run pytest pdu/tests/ -v
