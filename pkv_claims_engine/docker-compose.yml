@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: pkv
+      POSTGRES_USER: pkv
+      POSTGRES_PASSWORD: pkv_secret
+    volumes:
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pkv"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  pkv_claims_engine:
+    build:
+      context: ..
+      dockerfile: pkv_claims_engine/Dockerfile
+    environment:
+      PGCONNINFO: "host=postgres port=5432 dbname=pkv user=pkv password=pkv_secret"
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy

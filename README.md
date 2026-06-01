@@ -1,11 +1,12 @@
-# Hardware Event Bridge & PDU Power Monitor
+# Hardware Event Bridge, PDU Power Monitor & PKV Claims Engine
 
-Two embedded Linux systems in one repository — sharing a C++17 Observer/Factory architecture, SQLite logging, and systemd service infrastructure.
+Three C++ systems in one repository — sharing an httplib REST pattern, CMake FetchContent, and GitHub Actions CI.
 
 | Project | Description | Docs |
 |---|---|---|
 | **Hardware Event Bridge** | C++17 Linux daemon bridging serial/I2C sensors to a REST API via an Observer + Factory pipeline | [docs/event-bridge.md](docs/event-bridge.md) |
 | **PDU Power Monitor** | ThermalFsm + 8-outlet PDU simulator reading `/sys`+`/proc`; Python asyncio aggregator logs P=V×I to SQLite | [docs/pdu.md](docs/pdu.md) |
+| **PKV Claims Engine** | C++20 private-health-insurance claims backend — pure `ClaimValidator` + `ReimbursementCalculator`, libpqxx 7.9 repositories, cpp-httplib REST layer, Docker Compose + PostgreSQL 16 | [pkv_claims_engine/](pkv_claims_engine/) |
 
 ---
 
