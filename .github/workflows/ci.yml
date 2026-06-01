@@ -54,11 +54,7 @@ jobs:
         run: psql -h localhost -U pkv -d pkv_test -f pkv_claims_engine/sql/schema.sql
 
       - name: Configure
-        run: >
-          cmake -B build/pkv
-                -S pkv_claims_engine
-                -DCMAKE_BUILD_TYPE=Release
-                -DCMAKE_POLICY_DEFAULT_CMP0135=NEW
+        run: cmake -B build/pkv -S pkv_claims_engine -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_DEFAULT_CMP0135=NEW
 
       - name: Build test_pkv
         run: cmake --build build/pkv --target test_pkv -j$(nproc)
