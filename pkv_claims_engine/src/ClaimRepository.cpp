@@ -17,24 +17,23 @@ Claim ClaimRepository::rowToClaim(const pqxx::row& row) {
 
 int ClaimRepository::insert(const Claim& claim) {
     pqxx::work txn{conn_};
-    const auto row = txn.exec(
+    const auto row = txn.exec_params1(
         "INSERT INTO claims "
         "(policy_id, treatment_date, category, cost, deductible, status, reimbursement) "
         "VALUES ($1, $2::date, $3, $4, $5, $6, $7) RETURNING id",
-        pqxx::params{claim.policy_id, claim.treatment_date, claim.category,
-                     claim.cost, claim.deductible, claim.status,
-                     claim.reimbursement}).one_row();
+        claim.policy_id, claim.treatment_date, claim.category,
+        claim.cost, claim.deductible, claim.status, claim.reimbursement);
     txn.commit();
     return row[0].as<int>();
 }
 
 std::optional<Claim> ClaimRepository::findById(int id) {
     pqxx::work txn{conn_};
-    const auto rows = txn.exec(
+    const auto rows = txn.exec_params(
         "SELECT id, policy_id, treatment_date::text, category, "
         "       cost::float8, deductible::float8, status, reimbursement::float8 "
         "FROM claims WHERE id = $1",
-        pqxx::params{id});
+        id);
     txn.commit();
     if (rows.empty()) return std::nullopt;
     return rowToClaim(rows[0]);
@@ -42,11 +41,11 @@ std::optional<Claim> ClaimRepository::findById(int id) {
 
 std::vector<Claim> ClaimRepository::findByPolicyId(int policy_id) {
     pqxx::work txn{conn_};
-    const auto rows = txn.exec(
+    const auto rows = txn.exec_params(
         "SELECT id, policy_id, treatment_date::text, category, "
         "       cost::float8, deductible::float8, status, reimbursement::float8 "
         "FROM claims WHERE policy_id = $1 ORDER BY id",
-        pqxx::params{policy_id});
+        policy_id);
     txn.commit();
     std::vector<Claim> result;
     result.reserve(rows.size());
@@ -56,10 +55,10 @@ std::vector<Claim> ClaimRepository::findByPolicyId(int policy_id) {
 
 double ClaimRepository::sumApprovedByPolicyId(int policy_id) {
     pqxx::work txn{conn_};
-    const auto row = txn.exec(
+    const auto row = txn.exec_params1(
         "SELECT COALESCE(SUM(reimbursement), 0.0)::float8 "
         "FROM claims WHERE policy_id = $1 AND status = 'approved'",
-        pqxx::params{policy_id}).one_row();
+        policy_id);
     txn.commit();
     return row[0].as<double>();
 }

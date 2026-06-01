@@ -24,14 +24,14 @@ protected:
         pqxx::work txn{*conn};
         txn.exec("TRUNCATE claims, coverages, policies, subscribers RESTART IDENTITY CASCADE");
         txn.exec("INSERT INTO subscribers (name, email) VALUES ('Test User', 'test@example.com')");
-        const auto row = txn.exec(
+        const auto row = txn.exec_params1(
             "INSERT INTO policies (subscriber_id, policy_number, start_date, end_date, annual_limit) "
-            "VALUES (1, 'PKV-0001', '2024-01-01', '2024-12-31', 5000.00) RETURNING id").one_row();
+            "VALUES (1, 'PKV-0001', '2024-01-01', '2024-12-31', 5000.00) RETURNING id");
         policy_id = row[0].as<int>();
-        txn.exec("INSERT INTO coverages (policy_id, category, rate) VALUES ($1, 'hospital', 0.80)",
-                 pqxx::params{policy_id});
-        txn.exec("INSERT INTO coverages (policy_id, category, rate) VALUES ($1, 'dental', 0.60)",
-                 pqxx::params{policy_id});
+        txn.exec_params("INSERT INTO coverages (policy_id, category, rate) VALUES ($1, 'hospital', 0.80)",
+                        policy_id);
+        txn.exec_params("INSERT INTO coverages (policy_id, category, rate) VALUES ($1, 'dental', 0.60)",
+                        policy_id);
         txn.commit();
     }
 };

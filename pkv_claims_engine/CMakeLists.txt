@@ -29,14 +29,15 @@ add_library(pkv_data STATIC
 )
 target_include_directories(pkv_data PUBLIC include src)
 target_link_libraries(pkv_data PUBLIC pkv_domain PkgConfig::PQXX Threads::Threads)
-target_compile_options(pkv_data PRIVATE -Wall -Wextra)
+# exec_params / exec_params1 are deprecated in libpqxx >=7.10 but still correct in 7.9 (CI)
+target_compile_options(pkv_data PRIVATE -Wall -Wextra -Wno-deprecated-declarations)
 
 # REST server — cpp-httplib + nlohmann/json (single-header, from ../third_party)
 add_library(pkv_server STATIC src/ClaimsServer.cpp)
 target_include_directories(pkv_server PUBLIC include src
   ${CMAKE_CURRENT_SOURCE_DIR}/../third_party)
 target_link_libraries(pkv_server PUBLIC pkv_domain pkv_data)
-target_compile_options(pkv_server PRIVATE -Wall -Wextra)
+target_compile_options(pkv_server PRIVATE -Wall -Wextra -Wno-deprecated-declarations)
 
 # Main executable
 add_executable(pkv_claims_engine src/main.cpp)
@@ -51,5 +52,5 @@ add_executable(test_pkv
 )
 target_include_directories(test_pkv PRIVATE include src)
 target_link_libraries(test_pkv PRIVATE pkv_domain pkv_data GTest::gtest_main)
-target_compile_options(test_pkv PRIVATE -Wall -Wextra)
+target_compile_options(test_pkv PRIVATE -Wall -Wextra -Wno-deprecated-declarations)
 gtest_discover_tests(test_pkv)
